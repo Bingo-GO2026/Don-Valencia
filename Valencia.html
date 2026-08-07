@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>The Life of Don Julio &amp; Don Julia</title>
+
+<!-- Firebase (same SDK version as the Bingo-GO game, compat build) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<style>
+  :root {
+    --gold: #c9a227;
+    --gold-dark: #8a6d1a;
+    --cream: #fdf6e3;
+    --ink: #2c2416;
+    --road: #d8c9a3;
+    --julio: #2d6ea6;
+    --julia: #b5486b;
+    --done: #3aa65a;
+    --locked: #b9b0a0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #fdf6e3 0%, #f3e3b8 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.actief { display: flex; }
+
+  /* ── Team select screen ── */
+  #screen-team-select {
+    align-items: center; justify-content: center; padding: 2rem 1.25rem; gap: 1.5rem; text-align: center;
+  }
+  #screen-team-select h1 { font-size: 1.6rem; margin: 0; }
+  #screen-team-select p.subtitel { color: #6b5f45; margin: 0 0 1rem; max-width: 320px; }
+  .team-keuze-rij { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .team-knop {
+    width: 150px; padding: 1.5rem 1rem; border-radius: 18px; border: none; cursor: pointer;
+    font-weight: 800; font-size: 1.05rem; color: #fff; box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  }
+  .team-knop:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+  .team-knop.julio { background: var(--julio); }
+  .team-knop.julia { background: var(--julia); }
+  .team-knop .icoon { display: block; font-size: 2rem; margin-bottom: 0.4rem; }
+
+  /* ── Password popup (shared style for create + join) ── */
+  .overlay {
+    display: none; position: fixed; inset: 0; background: rgba(30,20,10,0.55);
+    align-items: center; justify-content: center; z-index: 50; padding: 1rem;
+  }
+  .overlay.actief { display: flex; }
+  .popup {
+    background: #fff; border-radius: 20px; padding: 1.5rem; max-width: 380px; width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .popup h3 { margin: 0 0 0.5rem; }
+  .popup p { color: #6b5f45; font-size: 0.9rem; margin: 0 0 1rem; }
+  .popup input[type=text], .popup input[type=password], .popup textarea {
+    width: 100%; padding: 0.7rem 0.9rem; border-radius: 10px; border: 2px solid #e6dcc0;
+    font-size: 1rem; margin-bottom: 0.75rem; font-family: inherit;
+  }
+  .knop {
+    width: 100%; padding: 0.8rem; border-radius: 12px; border: none; font-weight: 800;
+    font-size: 1rem; cursor: pointer; color: #fff; background: var(--gold-dark);
+  }
+  .knop.grijs { background: #cfc6ac; color: #4a4230; }
+  .knop-rij { display: flex; gap: 0.6rem; }
+  .fout-tekst { color: #b5486b; font-size: 0.85rem; margin: -0.4rem 0 0.6rem; display: none; }
+
+  /* ── Board screen ── */
+  #screen-board { padding: 1rem; gap: 1rem; }
+  .board-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1rem; border-radius: 14px; color: #fff; font-weight: 800;
+  }
+  .board-header.julio { background: var(--julio); }
+  .board-header.julia { background: var(--julia); }
+  .board-header .voortgang { font-weight: 700; font-size: 0.85rem; opacity: 0.9; }
+  #exit-knop { background: rgba(255,255,255,0.25); border: none; color: #fff; border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer; font-weight: 700; }
+
+  #pad-container { position: relative; flex: 1; min-height: 70vh; }
+  #pad-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .node {
+    position: absolute; width: 56px; height: 56px; margin-left: -28px; margin-top: -28px;
+    border-radius: 50%; border: 4px solid #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease;
+  }
+  .node.locked { background: var(--locked); cursor: not-allowed; opacity: 0.6; }
+  .node.actief { background: #e0483f; animation: pulse 1.4s infinite; }
+  .node.voltooid { background: var(--done); }
+  .node:not(.locked):active { transform: scale(0.92); }
+  .node .label {
+    position: absolute; top: 62px; width: 110px; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 0.7rem; font-weight: 800; color: #4a4230;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 0 rgba(224,72,63,0.6); }
+    50% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 10px rgba(224,72,63,0); }
+  }
+
+  /* ── Challenge modal ── */
+  #modal-uitdaging .popup { max-width: 420px; }
+  #uitdaging-icoon { font-size: 2.2rem; text-align: center; margin-bottom: 0.25rem; }
+  #uitdaging-hint { font-size: 0.8rem; color: var(--gold-dark); font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; text-align: center; margin-bottom: 0.4rem; }
+  #uitdaging-titel { text-align: center; }
+  #uitdaging-tekst { text-align: center; }
+  #upload-preview { width: 100%; border-radius: 12px; margin-bottom: 0.75rem; display: none; max-height: 240px; object-fit: cover; }
+  #upload-status { font-size: 0.85rem; color: #6b5f45; text-align: center; margin-bottom: 0.5rem; display: none; }
+
+  /* ── End screen ── */
+  #modal-einde .popup { max-width: 460px; text-align: center; }
+  #einde-galerij { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 1rem 0; }
+  #einde-galerij img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+  <!-- ═══ SCREEN 1: pick your team ═══ -->
+  <div id="screen-team-select" class="screen actief">
+    <h1>🍾 The Life of Don Julio &amp; Don Julia</h1>
+    <p class="subtitel">Pick your team to start the journey. Ask your team for the password if they've already started.</p>
+    <div class="team-keuze-rij">
+      <button class="team-knop julio" onclick="kiesTeam('julio')"><span class="icoon">🤵</span>Don Julio</button>
+      <button class="team-knop julia" onclick="kiesTeam('julia')"><span class="icoon">👰</span>Don Julia</button>
+    </div>
+  </div>
+
+  <!-- Password popup: covers both "create" (first joiner) and "join" (rest of team) -->
+  <div id="overlay-wachtwoord" class="overlay">
+    <div class="popup">
+      <h3 id="wachtwoord-titel">Team password</h3>
+      <p id="wachtwoord-uitleg">Be the first? Set a password for your team and share it with everyone joining.</p>
+      <input type="text" id="wachtwoord-input" maxlength="20" placeholder="e.g. donjulio2026" autocomplete="off" />
+      <div class="fout-tekst" id="wachtwoord-fout">Wrong password — try again.</div>
+      <div class="knop-rij">
+        <button class="knop grijs" onclick="sluitWachtwoordPopup()">Cancel</button>
+        <button class="knop" onclick="bevestigWachtwoord()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 2: the board ═══ -->
+  <div id="screen-board" class="screen">
+    <div class="board-header" id="board-header">
+      <span id="board-header-titel">Don Julio</span>
+      <span class="voortgang" id="board-voortgang">0 / 15</span>
+      <button id="exit-knop" onclick="verlaatNaarStart()">Exit</button>
+    </div>
+    <div id="pad-container">
+      <svg id="pad-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      <!-- nodes get injected here by JS -->
+    </div>
+  </div>
+
+  <!-- Challenge modal -->
+  <div id="modal-uitdaging" class="overlay">
+    <div class="popup">
+      <div id="uitdaging-icoon">🍾</div>
+      <div id="uitdaging-hint">Near: —</div>
+      <h3 id="uitdaging-titel">Title</h3>
+      <p id="uitdaging-tekst">Text</p>
+      <img id="upload-preview" />
+      <p id="upload-status">Uploading…</p>
+      <input type="file" id="bestand-input" accept="image/*" capture="environment" style="display:none" onchange="bestandGekozen(event)" />
+      <div class="knop-rij">
+        <button class="knop grijs" onclick="sluitUitdaging()">Close</button>
+        <button class="knop" id="upload-knop" onclick="document.getElementById('bestand-input').click()">📷 Take / choose photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End of game -->
+  <div id="modal-einde" class="overlay">
+    <div class="popup">
+      <h2>🎉 That's the story of Don Julio &amp; Don Julia!</h2>
+      <p>Thanks for playing — here's your journey:</p>
+      <div id="einde-galerij"></div>
+      <button class="knop" onclick="sluitEinde()">OK</button>
+    </div>
+  </div>
+
+<script>
+  // ══════════════════════════════════════════════════════════════════
+  // SETUP — see SETUP.md in this repo for how to create your own values.
+  // These are placeholders and will NOT work until you fill them in.
+  // ══════════════════════════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT.firebaseapp.com",
+    databaseURL:       "https://YOUR_PROJECT-default-rtdb.YOUR_REGION.firebasedatabase.app",
+    projectId:         "YOUR_PROJECT",
+    storageBucket:      "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID",
+  };
+  const CLOUDINARY_CLOUD_NAME    = "YOUR_CLOUD_NAME";
+  const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+
+  // One fixed event path — this whole file is built for a single trip/event,
+  // not many concurrent groups. Change this string if you ever reuse the app
+  // for a different trip (gives it a fresh, empty game state in Firebase).
+  const EVENT_ID = "valencia2026";
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.database();
+
+  // ══════════════════════════════════════════════════════════════════
+  // CHALLENGES — edit freely. Each one is a stop on the path, in order.
+  // `hint` = the landmark to go find. `titel`/`tekst` = the story beat and
+  // what to reenact for the photo. Placeholder set below uses real Valencia
+  // landmarks as a starting point — swap in your own route/order.
+  // ══════════════════════════════════════════════════════════════════
+  const CHALLENGES = [
+    { icoon: "🍾", hint: "Mercado Central",                 titel: "Born",               tekst: "Don Julio/Julia was born amid the bustle of the Mercado Central. Take a photo 'discovering' the bottle for the first time, surrounded by the market." },
+    { icoon: "🎈", hint: "Jardín del Turia",                titel: "Childhood",          tekst: "A carefree childhood running through the old riverbed gardens. Recreate a playful kid moment in the Turia gardens." },
+    { icoon: "📚", hint: "La Lonja de la Seda",              titel: "School Days",        tekst: "Off to the fanciest school in the city. Pose like studious (or mischievous) students outside La Lonja." },
+    { icoon: "💘", hint: "Plaza de la Virgen",               titel: "First Love",         tekst: "Don Julio/Julia met their first love right here. Reenact the meet-cute at Plaza de la Virgen." },
+    { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Rebellious Phase",   tekst: "A wild teenage phase in the Carmen neighbourhood's street art alleys. Strike your best rebel pose." },
+    { icoon: "💼", hint: "Mercado de Colón",                 titel: "First Job",          tekst: "Landed a fancy first job. Take a very serious 'business' photo at Mercado de Colón." },
+    { icoon: "🗺️", hint: "Torres de Serranos",               titel: "The Big Adventure",  tekst: "Left through the old city gates for a life-changing adventure. Recreate a dramatic departure at Torres de Serranos." },
+    { icoon: "🏖️", hint: "Playa de la Malvarrosa",           titel: "Beach Day",          tekst: "A well-earned beach day. Get the whole team into a beach photo at Malvarrosa." },
+    { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Rise to Fame",       tekst: "Don Julio/Julia became famous, stepping into the future at the City of Arts and Sciences. Pose like a superstar." },
+    { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Underwater Romance", tekst: "A second romance, this time underwater. Recreate a love story moment near the Oceanogràfic." },
+    { icoon: "🦁", hint: "Bioparc València",                 titel: "Family Outing",      tekst: "A family day out. Recreate a classic family-photo pose at Bioparc." },
+    { icoon: "🎉", hint: "Carmen nightlife",                 titel: "One Wild Night",     tekst: "One legendary night out. Capture the team mid-celebration in the Carmen nightlife streets." },
+    { icoon: "🌳", hint: "Jardines del Real (Viveros)",      titel: "Time to Reflect",    tekst: "A quiet moment of reflection. A calm, thoughtful photo in the Viveros gardens." },
+    { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Old Age & Legacy",   tekst: "A long life, well lived. Recreate a proud, statue-like pose at Plaza del Ayuntamiento." },
+    { icoon: "🥂", hint: "Tonight's final spot",             titel: "The Final Toast",    tekst: "The story ends where it's about to be uncorked. Get everyone together for the final toast photo." },
+  ];
+
+  // ══════════════════════════════════════════════════════════════════
+  // STATE
+  // ══════════════════════════════════════════════════════════════════
+  let huidigTeam = null;      // 'julio' | 'julia'
+  let huidigeIndex = 0;       // index of the currently unlocked/active challenge
+  let voltooid = {};          // { index: { fotoUrl, ts } } — completed challenges
+  let authKlaar = false;
+  let gekozenBestand = null;
+
+  auth.signInAnonymously().catch(function(err) { console.error('Auth failed:', err); });
+  auth.onAuthStateChanged(function(user) {
+    authKlaar = !!user;
+    const opgeslagenTeam = localStorage.getItem('donjulio_team');
+    const opgeslagenPw   = localStorage.getItem('donjulio_pw');
+    if (authKlaar && opgeslagenTeam && opgeslagenPw) {
+      herstelSessie(opgeslagenTeam, opgeslagenPw);
+    }
+  });
+
+  function teamRef(team) { return db.ref('spellen/' + EVENT_ID + '/teams/' + team); }
+
+  // ── Team pick + password gate ──
+  let _wachtwoordVoorTeam = null;
+
+  function kiesTeam(team) {
+    _wachtwoordVoorTeam = team;
+    teamRef(team).child('wachtwoord').get().then(function(snap) {
+      const bestaandWachtwoord = snap.val();
+      const titel = document.getElementById('wachtwoord-titel');
+      const uitleg = document.getElementById('wachtwoord-uitleg');
+      document.getElementById('wachtwoord-input').value = '';
+      document.getElementById('wachtwoord-fout').style.display = 'none';
+      if (bestaandWachtwoord) {
+        titel.textContent = 'Enter the team password';
+        uitleg.textContent = 'Someone on your team already started — ask them for the password.';
+      } else {
+        titel.textContent = 'Set a team password';
+        uitleg.textContent = "You're first! Pick a password and share it with your teammates.";
+      }
+      document.getElementById('overlay-wachtwoord').classList.add('actief');
+    });
+  }
+
+  function sluitWachtwoordPopup() {
+    document.getElementById('overlay-wachtwoord').classList.remove('actief');
+    _wachtwoordVoorTeam = null;
+  }
+
+  async function bevestigWachtwoord() {
+    const ingevoerd = document.getElementById('wachtwoord-input').value.trim();
+    if (!ingevoerd) return;
+    const team = _wachtwoordVoorTeam;
+    const snap = await teamRef(team).child('wachtwoord').get();
+    const bestaand = snap.val();
+    if (bestaand) {
+      if (ingevoerd !== bestaand) {
+        document.getElementById('wachtwoord-fout').style.display = 'block';
+        return;
+      }
+    } else {
+      await teamRef(team).child('wachtwoord').set(ingevoerd);
+    }
+    localStorage.setItem('donjulio_team', team);
+    localStorage.setItem('donjulio_pw', ingevoerd);
+    document.getElementById('overlay-wachtwoord').classList.remove('actief');
+    startTeam(team);
+  }
+
+  function herstelSessie(team, wachtwoord) {
+    teamRef(team).child('wachtwoord').get().then(function(snap) {
+      if (snap.val() === wachtwoord) startTeam(team);
+    });
+  }
+
+  function startTeam(team) {
+    huidigTeam = team;
+    document.getElementById('screen-team-select').classList.remove('actief');
+    document.getElementById('screen-board').classList.add('actief');
+    const header = document.getElementById('board-header');
+    header.className = 'board-header ' + team;
+    document.getElementById('board-header-titel').textContent = team === 'julio' ? 'Don Julio' : 'Don Julia';
+    bindListener();
+  }
+
+  function verlaatNaarStart() {
+    if (teamListenerRef) { teamListenerRef.off(); teamListenerRef = null; }
+    huidigTeam = null;
+    document.getElementById('screen-board').classList.remove('actief');
+    document.getElementById('screen-team-select').classList.add('actief');
+  }
+
+  // ── Live sync of team progress ──
+  let teamListenerRef = null;
+  function bindListener() {
+    teamListenerRef = teamRef(huidigTeam);
+    teamListenerRef.on('value', function(snap) {
+      const data = snap.val() || {};
+      huidigeIndex = data.huidigeIndex || 0;
+      voltooid = data.voltooid || {};
+      renderBord();
+      if (huidigeIndex >= CHALLENGES.length) toonEinde();
+    });
+  }
+
+  // ── Board rendering: Mario-overworld style snake path ──
+  function knoopPositie(i, totaal) {
+    const rijen = Math.ceil(totaal / 3);
+    const rij = Math.floor(i / 3);
+    const posInRij = i % 3;
+    const rijEvenRichting = rij % 2 === 0; // even rows: left-to-right, odd: right-to-left
+    const col = rijEvenRichting ? posInRij : (2 - posInRij);
+    const x = 20 + col * 30;                              // 20 / 50 / 80
+    const y = rijen <= 1 ? 50 : 10 + (rij / (rijen - 1)) * 80; // spread 10–90
+    return { x: x, y: y };
+  }
+
+  function renderBord() {
+    const container = document.getElementById('pad-container');
+    const svg = document.getElementById('pad-svg');
+    document.getElementById('board-voortgang').textContent = Math.min(huidigeIndex, CHALLENGES.length) + ' / ' + CHALLENGES.length;
+
+    // Remove old node elements (keep the svg)
+    container.querySelectorAll('.node').forEach(function(el) { el.remove(); });
+
+    const punten = CHALLENGES.map(function(c, i) { return knoopPositie(i, CHALLENGES.length); });
+
+    // Draw the path
+    let lijnPunten = punten.map(function(p) { return p.x + ',' + p.y; }).join(' ');
+    svg.innerHTML = '<polyline points="' + lijnPunten + '" fill="none" stroke="#d8c9a3" stroke-width="2.5" stroke-dasharray="1 3" stroke-linecap="round" />';
+
+    punten.forEach(function(p, i) {
+      const el = document.createElement('div');
+      let status = 'locked';
+      if (voltooid[i]) status = 'voltooid';
+      else if (i === huidigeIndex) status = 'actief';
+      el.className = 'node ' + status;
+      el.style.left = p.x + '%';
+      el.style.top  = p.y + '%';
+      el.innerHTML = (status === 'voltooid' ? '✓' : CHALLENGES[i].icoon) +
+        '<span class="label">' + CHALLENGES[i].titel + '</span>';
+      if (status === 'actief') el.addEventListener('click', function() { openUitdaging(i); });
+      if (status === 'voltooid') el.addEventListener('click', function() { bekijkVoltooid(i); });
+      container.appendChild(el);
+    });
+  }
+
+  // ── Challenge modal ──
+  let huidigeUitdagingIndex = null;
+
+  function openUitdaging(i) {
+    huidigeUitdagingIndex = i;
+    const c = CHALLENGES[i];
+    document.getElementById('uitdaging-icoon').textContent = c.icoon;
+    document.getElementById('uitdaging-hint').textContent = 'Near: ' + c.hint;
+    document.getElementById('uitdaging-titel').textContent = c.titel;
+    document.getElementById('uitdaging-tekst').textContent = c.tekst;
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('upload-status').style.display = 'none';
+    document.getElementById('upload-knop').disabled = false;
+    document.getElementById('upload-knop').textContent = '📷 Take / choose photo';
+    document.getElementById('modal-uitdaging').classList.add('actief');
+  }
+
+  function bekijkVoltooid(i) {
+    const c = CHALLENGES[i];
+    const v = voltooid[i];
+    huidigeUitdagingIndex = null; // read-only view, no re-upload
+    document.getElementById('uitdaging-icoon').textContent = c.icoon;
+    document.getElementById('uitdaging-hint').textContent = 'Near: ' + c.hint;
+    document.getElementById('uitdaging-titel').textContent = c.titel + ' ✓';
+    document.getElementById('uitdaging-tekst').textContent = c.tekst;
+    const preview = document.getElementById('upload-preview');
+    if (v && v.fotoUrl) { preview.src = v.fotoUrl; preview.style.display = 'block'; }
+    document.getElementById('upload-status').style.display = 'none';
+    document.getElementById('upload-knop').disabled = true;
+    document.getElementById('upload-knop').textContent = 'Already completed';
+    document.getElementById('modal-uitdaging').classList.add('actief');
+  }
+
+  function sluitUitdaging() {
+    document.getElementById('modal-uitdaging').classList.remove('actief');
+    huidigeUitdagingIndex = null;
+  }
+
+  async function bestandGekozen(event) {
+    const bestand = event.target.files[0];
+    event.target.value = '';
+    if (!bestand || huidigeUitdagingIndex === null) return;
+
+    const preview = document.getElementById('upload-preview');
+    const status  = document.getElementById('upload-status');
+    const knop    = document.getElementById('upload-knop');
+    preview.src = URL.createObjectURL(bestand);
+    preview.style.display = 'block';
+    status.style.display = 'block';
+    status.textContent = 'Uploading…';
+    knop.disabled = true;
+
+    try {
+      const fotoUrl = await uploadNaarCloudinary(bestand);
+      status.textContent = 'Uploaded! Unlocking the next stop…';
+      const i = huidigeUitdagingIndex;
+      // Only advance if this is still the currently-active square (avoids two
+      // teammates both uploading at once and double-advancing the index).
+      await teamRef(huidigTeam).transaction(function(data) {
+        data = data || {};
+        if ((data.huidigeIndex || 0) !== i) return data; // someone beat you to it
+        data.voltooid = data.voltooid || {};
+        data.voltooid[i] = { fotoUrl: fotoUrl, ts: Date.now() };
+        data.huidigeIndex = i + 1;
+        return data;
+      });
+      setTimeout(sluitUitdaging, 700);
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'Upload failed — try again.';
+      knop.disabled = false;
+    }
+  }
+
+  function uploadNaarCloudinary(bestand) {
+    return new Promise(function(resolve, reject) {
+      const form = new FormData();
+      form.append('file', bestand);
+      form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', {
+        method: 'POST', body: form,
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.secure_url) resolve(data.secure_url);
+          else reject(new Error(data.error ? data.error.message : 'Upload failed'));
+        })
+        .catch(reject);
+    });
+  }
+
+  // ── End of game ──
+  let eindeGetoond = false;
+  function toonEinde() {
+    if (eindeGetoond) return;
+    eindeGetoond = true;
+    const galerij = document.getElementById('einde-galerij');
+    galerij.innerHTML = '';
+    CHALLENGES.forEach(function(c, i) {
+      if (voltooid[i] && voltooid[i].fotoUrl) {
+        const img = document.createElement('img');
+        img.src = voltooid[i].fotoUrl;
+        galerij.appendChild(img);
+      }
+    });
+    document.getElementById('modal-einde').classList.add('actief');
+  }
+
+  function sluitEinde() {
+    document.getElementById('modal-einde').classList.remove('actief');
+    eindeGetoond = false;
+    verlaatNaarStart();
+  }
+</script>
+</body>
+</html>
