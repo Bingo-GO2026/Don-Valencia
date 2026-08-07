@@ -168,7 +168,19 @@
   .board-header .voortgang { font-weight: 700; font-size: 0.85rem; opacity: 0.9; }
   #exit-knop { background: rgba(255,255,255,0.25); border: none; color: #fff; border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer; font-weight: 700; }
 
-  #pad-container { position: relative; flex: 1; min-height: 70vh; background: #f4f1e8; }
+  /* Grass, just for the challenge path itself — everything else (header,
+     other screens) stays on the calmer off-white/black. Two small dot
+     patterns at different sizes/offsets give it a mottled texture instead
+     of a flat block of color. */
+  #pad-container {
+    position: relative; flex: 1; min-height: 70vh;
+    background-color: #6ab04c;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1.4px),
+      radial-gradient(circle, rgba(0,0,0,0.10) 1px, transparent 1.4px);
+    background-size: 14px 14px, 9px 9px;
+    background-position: 0 0, 5px 6px;
+  }
   #pad-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .node {
     position: absolute; width: 52px; height: 52px; margin-left: -26px; margin-top: -26px;
@@ -312,7 +324,10 @@
       <p id="uitdaging-tekst">Text</p>
       <img id="upload-preview" />
       <p id="upload-status">Uploading…</p>
-      <input type="file" id="bestand-input" accept="image/*" capture="environment" style="display:none" onchange="bestandGekozen(event)" />
+      <!-- No `capture` attribute — that forces straight to the camera and
+           hides the photo library option. Leaving it off lets the phone's
+           native picker offer both "Take Photo" and "Choose from Library". -->
+      <input type="file" id="bestand-input" accept="image/*" style="display:none" onchange="bestandGekozen(event)" />
       <div class="knop-rij">
         <button class="knop grijs" onclick="sluitUitdaging()">Close</button>
         <button class="knop" id="upload-knop" onclick="document.getElementById('bestand-input').click()">📷 Take / choose photo</button>
