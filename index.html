@@ -42,21 +42,68 @@
   }
   .screen.actief { display: flex; }
 
-  /* ── Team select screen ── */
+  /* ── Main menu — pure black stage, no text, image + Start Game only ── */
+  #screen-hoofdmenu {
+    background: #000; align-items: center; justify-content: center;
+    padding: 2rem 1.5rem; gap: 1.75rem;
+  }
+  .stage {
+    position: relative; height: 62dvh; max-height: 620px; aspect-ratio: 9 / 16;
+    max-width: 92%; display: flex; align-items: center; justify-content: center;
+  }
+  .stage-img {
+    position: relative; z-index: 1; width: 100%; height: 100%;
+    object-fit: cover; border-radius: 10px;
+  }
+  /* Two crossing light beams + a soft pool of light at the base — CSS-only
+     stand-in for the spotlight reference image. */
+  .stage-beam {
+    position: absolute; top: -12%; width: 65%; height: 95%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.16), rgba(255,255,255,0) 72%);
+    clip-path: polygon(38% 0%, 62% 0%, 53% 100%, 47% 100%);
+    filter: blur(5px); pointer-events: none;
+  }
+  .stage-beam.left  { left: -20%;  transform: rotate(16deg);  transform-origin: top center; }
+  .stage-beam.right { right: -20%; transform: rotate(-16deg); transform-origin: top center; }
+  .stage-glow {
+    position: absolute; left: 50%; bottom: 2%; width: 75%; aspect-ratio: 3 / 1;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.22), rgba(255,255,255,0) 72%);
+    filter: blur(3px); pointer-events: none;
+  }
+  .start-knop {
+    width: 100%; max-width: 320px; padding: 1.1rem; border: none; border-radius: 14px;
+    background: var(--gold); color: #1a1408; font-weight: 900; font-size: 1.1rem;
+    letter-spacing: 0.03em; cursor: pointer;
+    box-shadow: 0 10px 36px rgba(201,162,39,0.5), 0 3px 12px rgba(0,0,0,0.4);
+    transition: transform 0.12s, filter 0.15s;
+  }
+  .start-knop:hover  { filter: brightness(1.08); }
+  .start-knop:active { transform: scale(0.97); }
+
+  /* ── Team select screen — dark background, big neon stacked buttons,
+     same formula as Bingo-GO's team-choice screen ── */
   #screen-team-select {
+    background: #000;
     align-items: center; justify-content: center; padding: 2rem 1.25rem; gap: 1.5rem; text-align: center;
   }
-  #screen-team-select h1 { font-size: 1.6rem; margin: 0; }
-  #screen-team-select p.subtitel { color: #6b5f45; margin: 0 0 1rem; max-width: 320px; }
-  .team-keuze-rij { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  #screen-team-select h1 { font-size: 1.5rem; margin: 0; color: #fff; }
+  #screen-team-select p.subtitel { color: rgba(255,255,255,0.55); margin: 0 0 1rem; max-width: 320px; }
+  .team-knoppen { display: flex; flex-direction: column; gap: 0.9rem; width: 100%; max-width: 400px; }
   .team-knop {
-    width: 150px; padding: 1.5rem 1rem; border-radius: 18px; border: none; cursor: pointer;
-    font-weight: 800; font-size: 1.05rem; color: #fff; box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+    min-height: 32vh; width: 100%; padding: 1rem; border: none; border-radius: 20px;
+    font-family: inherit; cursor: pointer; color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
+    transition: transform 0.12s, filter 0.15s;
   }
-  .team-knop:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
-  .team-knop.julio { background: var(--julio); }
-  .team-knop.julia { background: var(--julia); }
-  .team-knop .icoon { display: block; font-size: 2rem; margin-bottom: 0.4rem; }
+  .team-knop:hover  { transform: scale(1.02); filter: brightness(1.06); }
+  .team-knop:active { transform: scale(0.97); }
+  .team-knop.julio { background: var(--julio); box-shadow: 0 10px 40px rgba(45,110,166,0.55), 0 4px 16px rgba(0,0,0,0.35); }
+  .team-knop.julia { background: var(--julia); box-shadow: 0 10px 40px rgba(181,72,107,0.55), 0 4px 16px rgba(0,0,0,0.35); }
+  .team-knop.julio:hover { box-shadow: 0 16px 52px rgba(45,110,166,0.65), 0 6px 20px rgba(0,0,0,0.4); }
+  .team-knop.julia:hover { box-shadow: 0 16px 52px rgba(181,72,107,0.65), 0 6px 20px rgba(0,0,0,0.4); }
+  .team-symbool { font-size: 3rem; line-height: 1; font-weight: 900; }
+  .team-naam    { font-size: 1.5rem; font-weight: 900; letter-spacing: 0.5px; }
 
   /* ── Password popup (shared style for create + join) ── */
   .overlay {
@@ -132,13 +179,29 @@
 </head>
 <body>
 
-  <!-- ═══ SCREEN 1: pick your team ═══ -->
-  <div id="screen-team-select" class="screen actief">
-    <h1>🍾 The Life of Don Julio &amp; Don Julia</h1>
+  <!-- ═══ SCREEN 1: main menu — image + Start Game, nothing else ═══ -->
+  <div id="screen-hoofdmenu" class="screen actief">
+    <div class="stage">
+      <div class="stage-beam left"></div>
+      <div class="stage-beam right"></div>
+      <div class="stage-glow"></div>
+      <!-- Save your artwork as hero.png in this same folder (repo root) -->
+      <img src="hero.png" alt="" class="stage-img" />
+    </div>
+    <button class="start-knop" onclick="toonTeamkeuze()">Start Game</button>
+  </div>
+
+  <!-- ═══ SCREEN 2: pick your team ═══ -->
+  <div id="screen-team-select" class="screen">
+    <h1>The Life of Don Julio &amp; Don Julia</h1>
     <p class="subtitel">Pick your team to start the journey. Ask your team for the password if they've already started.</p>
-    <div class="team-keuze-rij">
-      <button class="team-knop julio" onclick="kiesTeam('julio')"><span class="icoon">🤵</span>Don Julio</button>
-      <button class="team-knop julia" onclick="kiesTeam('julia')"><span class="icoon">👰</span>Don Julia</button>
+    <div class="team-knoppen">
+      <button class="team-knop julio" onclick="kiesTeam('julio')">
+        <span class="team-symbool">♂</span><span class="team-naam">Don Julio</span>
+      </button>
+      <button class="team-knop julia" onclick="kiesTeam('julia')">
+        <span class="team-symbool">♀</span><span class="team-naam">Don Julia</span>
+      </button>
     </div>
   </div>
 
@@ -197,7 +260,11 @@
   </div>
 
 <script>
-const firebaseConfig = {
+  // ══════════════════════════════════════════════════════════════════
+  // SETUP — see SETUP.md in this repo for how to create your own values.
+  // These are placeholders and will NOT work until you fill them in.
+  // ══════════════════════════════════════════════════════════════════
+  const firebaseConfig = {
     apiKey:            "AIzaSyDke7nASvyFfwwnf13cnaqtu9rhOObqXM8",
     authDomain:        "don-valencia.firebaseapp.com",
     databaseURL:       "https://don-valencia-default-rtdb.europe-west1.firebasedatabase.app",
@@ -210,6 +277,7 @@ const firebaseConfig = {
   const CLOUDINARY_UPLOAD_PRESET = "Don Valencia";
   const FOTO_MAX_BREEDTE = 1280;   // resize photos down to this max width before upload
   const FOTO_KWALITEIT   = 0.8;    // JPEG quality (0-1)
+
   // One fixed event path — this whole file is built for a single trip/event,
   // not many concurrent groups. Change this string if you ever reuse the app
   // for a different trip (gives it a fresh, empty game state in Firebase).
@@ -317,8 +385,16 @@ const firebaseConfig = {
     });
   }
 
+  function toonTeamkeuze() {
+    document.getElementById('screen-hoofdmenu').classList.remove('actief');
+    document.getElementById('screen-team-select').classList.add('actief');
+  }
+
   function startTeam(team) {
     huidigTeam = team;
+    // Covers both the normal path (from team-select) and auto-rejoin on
+    // page load (which can jump here straight from the main menu).
+    document.getElementById('screen-hoofdmenu').classList.remove('actief');
     document.getElementById('screen-team-select').classList.remove('actief');
     document.getElementById('screen-board').classList.add('actief');
     const header = document.getElementById('board-header');
@@ -327,11 +403,14 @@ const firebaseConfig = {
     bindListener();
   }
 
+  // Exit takes you all the way back to the main menu, not just team-select —
+  // a clean reset for whoever picks up the phone next.
   function verlaatNaarStart() {
     if (teamListenerRef) { teamListenerRef.off(); teamListenerRef = null; }
     huidigTeam = null;
     document.getElementById('screen-board').classList.remove('actief');
-    document.getElementById('screen-team-select').classList.add('actief');
+    document.getElementById('screen-team-select').classList.remove('actief');
+    document.getElementById('screen-hoofdmenu').classList.add('actief');
   }
 
   // ── Live sync of team progress ──
