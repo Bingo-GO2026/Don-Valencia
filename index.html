@@ -38,7 +38,7 @@
     display: none; flex-direction: column;
     max-width: 480px; margin: 0 auto;
     min-height: 100vh; min-height: 100dvh;
-    background: #fff;
+    background: #f4f1e8; /* soft warm off-white — calmer than pure white */
   }
   .screen.actief { display: flex; }
 
@@ -126,6 +126,12 @@
   .team-knop.julia:hover { box-shadow: 0 16px 52px rgba(181,72,107,0.65), 0 6px 20px rgba(0,0,0,0.4); }
   .team-symbool { font-size: 3rem; line-height: 1; font-weight: 900; }
   .team-naam    { font-size: 1.5rem; font-weight: 900; letter-spacing: 0.5px; }
+  .reset-link {
+    margin-top: 1.25rem; background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); font-size: 0.75rem; text-decoration: underline;
+    font-family: inherit; padding: 0.5rem;
+  }
+  .reset-link:hover { color: rgba(255,255,255,0.6); }
 
   /* ── Password popup (shared style for create + join) ── */
   .overlay {
@@ -162,7 +168,7 @@
   .board-header .voortgang { font-weight: 700; font-size: 0.85rem; opacity: 0.9; }
   #exit-knop { background: rgba(255,255,255,0.25); border: none; color: #fff; border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer; font-weight: 700; }
 
-  #pad-container { position: relative; flex: 1; min-height: 70vh; background: #fff; }
+  #pad-container { position: relative; flex: 1; min-height: 70vh; background: #f4f1e8; }
   #pad-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .node {
     position: absolute; width: 52px; height: 52px; margin-left: -26px; margin-top: -26px;
@@ -194,20 +200,27 @@
     filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
     transform-origin: 50% 100%;
     transform: scale(var(--figuur-schaal, 0.55));
-    transition: left 2.1s cubic-bezier(.45,0,.4,1), top 2.1s cubic-bezier(.45,0,.4,1), transform 0.6s ease;
+    transition: left 3.6s cubic-bezier(.45,0,.4,1), top 3.6s cubic-bezier(.45,0,.4,1), transform 0.6s ease;
     pointer-events: none; z-index: 5;
   }
-  /* Vertical hop, layered on top of the left/top glide, triggered for the
-     duration of each move — this is what makes it read as "hopping" rather
-     than sliding flat. */
+  /* A little bunny hop: three diminishing bounces with squash-and-stretch
+     (stretched tall mid-air, squashed on landing), layered on top of the
+     slow left/top glide so it reads as hopping across rather than sliding. */
   @keyframes spelerHop {
     0%   { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
-    25%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(-18px); }
-    50%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
-    75%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(-10px); }
+    6%   { transform: scale(var(--figuur-schaal, 0.55)) scaleY(0.82) scaleX(1.12) translateY(0); }
+    20%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(1.18) scaleX(0.9)  translateY(-22px); }
+    34%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(0.85) scaleX(1.1)  translateY(0); }
+    40%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
+    46%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(0.88) scaleX(1.08) translateY(0); }
+    58%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(1.12) scaleX(0.94) translateY(-14px); }
+    70%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(0.9)  scaleX(1.06) translateY(0); }
+    76%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
+    82%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(0.92) scaleX(1.05) translateY(0); }
+    91%  { transform: scale(var(--figuur-schaal, 0.55)) scaleY(1.07) scaleX(0.97) translateY(-7px); }
     100% { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
   }
-  .speler-figuur.hopt { animation: spelerHop 2.1s ease-in-out; }
+  .speler-figuur.hopt { animation: spelerHop 3.6s ease-in-out; }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 0 rgba(224,72,63,0.6); }
     50% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 10px rgba(224,72,63,0); }
@@ -260,6 +273,7 @@
         <span class="team-symbool">♀</span><span class="team-naam">Don Julia</span>
       </button>
     </div>
+    <button class="reset-link" onclick="resetSpel()">Reset game data (testing)</button>
   </div>
 
   <!-- Password popup: covers both "create" (first joiner) and "join" (rest of team) -->
@@ -448,6 +462,19 @@
     // Let the slide-apart transition finish, then take it fully out of the
     // way so it can't intercept taps on the main menu underneath.
     setTimeout(function() { g.style.display = 'none'; }, 950);
+  }
+
+  // Testing helper — wipes both teams' progress and passwords for this
+  // EVENT_ID entirely, and clears the saved local session so you don't
+  // keep auto-rejoining a half-finished test run. Remove or hide this
+  // button before the real event if you don't want guests able to see it.
+  async function resetSpel() {
+    const bevestigd = confirm('Reset ALL progress for both teams? This cannot be undone.');
+    if (!bevestigd) return;
+    await db.ref('spellen/' + EVENT_ID).remove();
+    localStorage.removeItem('donjulio_team');
+    localStorage.removeItem('donjulio_pw');
+    alert('Game reset — both teams will start fresh.');
   }
 
   function toonTeamkeuze() {
