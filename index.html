@@ -179,18 +179,35 @@
   /* Player marker — a little champagne-bottle silhouette that glides to the
      current node whenever huidigeIndex advances. */
   .speler-figuur {
-    position: absolute; width: 20px; height: 40px; margin-left: -10px; margin-top: -66px;
-    clip-path: polygon(40% 0%, 60% 0%, 60% 14%, 76% 30%, 76% 92%, 64% 100%, 36% 100%, 24% 92%, 24% 30%, 40% 14%);
-    background: linear-gradient(180deg, #2f6b45, #1d4530);
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.35));
-    transition: left 0.8s cubic-bezier(.4,0,.2,1), top 0.8s cubic-bezier(.4,0,.2,1);
+    position: absolute; width: 22px; height: 46px; margin-left: -11px; margin-top: -70px;
+    /* Long neck, rounded shoulder, straight body, tapered base — closer to
+       an actual Champagne bottle silhouette. */
+    clip-path: polygon(42% 0%, 58% 0%, 58% 20%, 80% 34%, 80% 90%, 72% 100%, 28% 100%, 20% 90%, 20% 34%, 42% 20%);
+    /* One gradient, hard color-stops: gold foil neck, dark body, thin gold
+       "label" band lower down — mirrors the reference bottle without needing
+       separate layered elements. */
+    background: linear-gradient(180deg,
+      #d9b13e 0%, #d9b13e 20%,
+      #161616 20%, #0c0c0c 60%,
+      #c9a227 62%, #c9a227 68%,
+      #0c0c0c 68%, #050505 100%);
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+    transform-origin: 50% 100%;
+    transform: scale(var(--figuur-schaal, 0.55));
+    transition: left 2.1s cubic-bezier(.45,0,.4,1), top 2.1s cubic-bezier(.45,0,.4,1), transform 0.6s ease;
     pointer-events: none; z-index: 5;
   }
-  .speler-figuur::after {
-    content: ""; position: absolute; top: -3px; left: 50%; transform: translateX(-50%);
-    width: 10px; height: 8px; border-radius: 3px 3px 0 0;
-    background: linear-gradient(180deg, #d4af37, #a9852a);
+  /* Vertical hop, layered on top of the left/top glide, triggered for the
+     duration of each move — this is what makes it read as "hopping" rather
+     than sliding flat. */
+  @keyframes spelerHop {
+    0%   { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
+    25%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(-18px); }
+    50%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
+    75%  { transform: scale(var(--figuur-schaal, 0.55)) translateY(-10px); }
+    100% { transform: scale(var(--figuur-schaal, 0.55)) translateY(0); }
   }
+  .speler-figuur.hopt { animation: spelerHop 2.1s ease-in-out; }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 0 rgba(224,72,63,0.6); }
     50% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 10px rgba(224,72,63,0); }
@@ -530,22 +547,38 @@
     updateSpelerFiguur(container, punten);
   }
 
-  // Little champagne-bottle marker that glides to whichever node is
-  // currently active — parked on the active node when idle, and animates
-  // over to the new one the moment huidigeIndex advances (CSS transition
-  // on left/top handles the actual "walking" motion).
+  // Little champagne-bottle marker that hops to whichever node is currently
+  // active — parked there when idle, and slowly hops over to the new one the
+  // moment huidigeIndex advances. Also grows from a "baby" bottle toward
+  // full size as more of the story gets completed.
+  let vorigeSpelerIndex = null;
   function updateSpelerFiguur(container, punten) {
     let fig = document.getElementById('speler-figuur');
     if (!fig) {
       fig = document.createElement('div');
       fig.id = 'speler-figuur';
       fig.className = 'speler-figuur';
+      // Appended once and never moved again — re-appending on every render
+      // (to "stay on top") was the bug that made it snap instead of glide:
+      // reinserting an element into the DOM resets its transition baseline.
+      // z-index already puts it above the nodes, so this isn't needed anyway.
       container.appendChild(fig);
-    } else {
-      container.appendChild(fig); // re-append so it renders on top of fresh nodes
     }
+
     const doelIndex = Math.min(huidigeIndex, CHALLENGES.length - 1);
     const doel = punten[doelIndex];
+
+    const voltooidAantal = Object.keys(voltooid).length;
+    const groei = 0.55 + Math.min(1, voltooidAantal / CHALLENGES.length) * 0.65; // 0.55 → 1.2
+    fig.style.setProperty('--figuur-schaal', groei.toFixed(2));
+
+    if (doelIndex !== vorigeSpelerIndex) {
+      // Restart the hop cleanly even if triggered again quickly.
+      fig.classList.remove('hopt');
+      void fig.offsetWidth; // force reflow so the class removal actually "sticks" before re-adding
+      fig.classList.add('hopt');
+      vorigeSpelerIndex = doelIndex;
+    }
     fig.style.left = doel.x + '%';
     fig.style.top  = doel.y + '%';
   }
