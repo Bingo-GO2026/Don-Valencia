@@ -19,18 +19,27 @@
     --road: #d8c9a3;
     --julio: #2d6ea6;
     --julia: #b5486b;
-    --done: #3aa65a;
+    --done: #2f6fb0;   /* completed node = blue, matches the Mario-map reference */
     --locked: #b9b0a0;
   }
   * { box-sizing: border-box; }
+  html, body { margin: 0; }
   body {
-    margin: 0;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(180deg, #fdf6e3 0%, #f3e3b8 100%);
+    background: #111;              /* black outside, same idea as Bingo-GO */
     color: var(--ink);
     min-height: 100vh;
+    min-height: 100dvh;            /* dvh accounts for mobile browser chrome */
   }
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  /* The "playing field" — white, phone-width, centered. On an actual phone
+     this fills the whole screen edge to edge; on desktop it shows as a
+     white column with black bars on either side. */
+  .screen {
+    display: none; flex-direction: column;
+    max-width: 480px; margin: 0 auto;
+    min-height: 100vh; min-height: 100dvh;
+    background: #fff;
+  }
   .screen.actief { display: flex; }
 
   /* ── Team select screen ── */
@@ -84,21 +93,22 @@
   .board-header .voortgang { font-weight: 700; font-size: 0.85rem; opacity: 0.9; }
   #exit-knop { background: rgba(255,255,255,0.25); border: none; color: #fff; border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer; font-weight: 700; }
 
-  #pad-container { position: relative; flex: 1; min-height: 70vh; }
-  #pad-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #pad-container { position: relative; flex: 1; min-height: 70vh; background: #fff; }
+  #pad-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .node {
-    position: absolute; width: 56px; height: 56px; margin-left: -28px; margin-top: -28px;
+    position: absolute; width: 52px; height: 52px; margin-left: -26px; margin-top: -26px;
     border-radius: 50%; border: 4px solid #fff; display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    font-size: 1.2rem; font-weight: 900; color: #fff; cursor: pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.15);
     transition: transform 0.15s ease;
   }
-  .node.locked { background: var(--locked); cursor: not-allowed; opacity: 0.6; }
+  .node.locked { background: var(--locked); cursor: not-allowed; box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
   .node.actief { background: #e0483f; animation: pulse 1.4s infinite; }
   .node.voltooid { background: var(--done); }
-  .node:not(.locked):active { transform: scale(0.92); }
+  .node:not(.locked):active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
   .node .label {
-    position: absolute; top: 62px; width: 110px; left: 50%; transform: translateX(-50%);
-    text-align: center; font-size: 0.7rem; font-weight: 800; color: #4a4230;
+    position: absolute; top: 58px; width: 100px; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 0.68rem; font-weight: 800; color: #4a4230;
   }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,0.25), 0 0 0 0 rgba(224,72,63,0.6); }
@@ -200,7 +210,6 @@ const firebaseConfig = {
   const CLOUDINARY_UPLOAD_PRESET = "Don Valencia";
   const FOTO_MAX_BREEDTE = 1280;   // resize photos down to this max width before upload
   const FOTO_KWALITEIT   = 0.8;    // JPEG quality (0-1)
-
   // One fixed event path — this whole file is built for a single trip/event,
   // not many concurrent groups. Change this string if you ever reuse the app
   // for a different trip (gives it a fresh, empty game state in Firebase).
@@ -360,9 +369,20 @@ const firebaseConfig = {
 
     const punten = CHALLENGES.map(function(c, i) { return knoopPositie(i, CHALLENGES.length); });
 
-    // Draw the path
-    let lijnPunten = punten.map(function(p) { return p.x + ',' + p.y; }).join(' ');
-    svg.innerHTML = '<polyline points="' + lijnPunten + '" fill="none" stroke="#d8c9a3" stroke-width="2.5" stroke-dasharray="1 3" stroke-linecap="round" />';
+    // Draw the path in real pixel space (not a 0-100 viewBox stretched to fit)
+    // so the stroke stays a true circle/round cap instead of getting warped
+    // by the container's aspect ratio. Node <div>s still use % positioning,
+    // which is unaffected by aspect ratio, so the two line up correctly.
+    const w = container.clientWidth, h = container.clientHeight;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    const lijnPunten = punten.map(function(p) { return (p.x / 100 * w) + ',' + (p.y / 100 * h); }).join(' ');
+    // Retro-path look: a dark "border" stroke underneath, a lighter "surface"
+    // stroke on top — same trick as the dirt/stone path tiles in the
+    // reference image (dark edge, lighter worn center), just via two strokes
+    // instead of a texture image.
+    svg.innerHTML =
+      '<polyline points="' + lijnPunten + '" fill="none" stroke="#a9895a" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />' +
+      '<polyline points="' + lijnPunten + '" fill="none" stroke="#e4c98f" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />';
 
     punten.forEach(function(p, i) {
       const el = document.createElement('div');
@@ -372,13 +392,19 @@ const firebaseConfig = {
       el.className = 'node ' + status;
       el.style.left = p.x + '%';
       el.style.top  = p.y + '%';
-      el.innerHTML = (status === 'voltooid' ? '✓' : CHALLENGES[i].icoon) +
+      el.innerHTML = (status === 'voltooid' ? '✓' : String(i + 1)) +
         '<span class="label">' + CHALLENGES[i].titel + '</span>';
       if (status === 'actief') el.addEventListener('click', function() { openUitdaging(i); });
       if (status === 'voltooid') el.addEventListener('click', function() { bekijkVoltooid(i); });
       container.appendChild(el);
     });
   }
+
+  // Re-draw on resize/orientation change so the path stays pixel-accurate
+  // (only matters while the board is actually visible).
+  window.addEventListener('resize', function() {
+    if (huidigTeam) renderBord();
+  });
 
   // ── Challenge modal ──
   let huidigeUitdagingIndex = null;
