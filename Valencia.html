@@ -187,21 +187,19 @@
   </div>
 
 <script>
-  // ══════════════════════════════════════════════════════════════════
-  // SETUP — see SETUP.md in this repo for how to create your own values.
-  // These are placeholders and will NOT work until you fill them in.
-  // ══════════════════════════════════════════════════════════════════
-  const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    databaseURL:       "https://YOUR_PROJECT-default-rtdb.YOUR_REGION.firebasedatabase.app",
-    projectId:         "YOUR_PROJECT",
-    storageBucket:      "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID",
+const firebaseConfig = {
+    apiKey:            "AIzaSyDke7nASvyFfwwnf13cnaqtu9rhOObqXM8",
+    authDomain:        "don-valencia.firebaseapp.com",
+    databaseURL:       "https://don-valencia-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:         "don-valencia",
+    storageBucket:      "don-valencia.firebasestorage.app",
+    messagingSenderId: "719331089999",
+    appId:             "1:719331089999:web:095216ba9d30f54a59d43a",
   };
-  const CLOUDINARY_CLOUD_NAME    = "YOUR_CLOUD_NAME";
-  const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+  const CLOUDINARY_CLOUD_NAME    = "wx2mgbvt";
+  const CLOUDINARY_UPLOAD_PRESET = "Don Valencia";
+  const FOTO_MAX_BREEDTE = 1280;   // resize photos down to this max width before upload
+  const FOTO_KWALITEIT   = 0.8;    // JPEG quality (0-1)
 
   // One fixed event path — this whole file is built for a single trip/event,
   // not many concurrent groups. Change this string if you ever reuse the app
@@ -420,6 +418,31 @@
     huidigeUitdagingIndex = null;
   }
 
+  // Resize + JPEG-compress before upload — keeps uploads fast on mobile data
+  // and caps how large a file can reach the Cloudinary API, on top of
+  // whatever allowed_formats/max_file_size you've set on the preset itself.
+  function comprimeerFoto(bestand) {
+    return new Promise(function(resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > FOTO_MAX_BREEDTE) { h = Math.round(h * FOTO_MAX_BREEDTE / w); w = FOTO_MAX_BREEDTE; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          try { resolve(canvas.toDataURL('image/jpeg', FOTO_KWALITEIT)); }
+          catch (err) { reject(err); }
+        };
+        img.onerror = function() { reject(new Error('invalid image')); };
+        img.src = e.target.result;
+      };
+      reader.onerror = function() { reject(new Error('failed to read file')); };
+      reader.readAsDataURL(bestand);
+    });
+  }
+
   async function bestandGekozen(event) {
     const bestand = event.target.files[0];
     event.target.value = '';
@@ -431,11 +454,13 @@
     preview.src = URL.createObjectURL(bestand);
     preview.style.display = 'block';
     status.style.display = 'block';
-    status.textContent = 'Uploading…';
+    status.textContent = 'Compressing…';
     knop.disabled = true;
 
     try {
-      const fotoUrl = await uploadNaarCloudinary(bestand);
+      const gecomprimeerd = await comprimeerFoto(bestand);
+      status.textContent = 'Uploading…';
+      const fotoUrl = await uploadNaarCloudinary(gecomprimeerd);
       status.textContent = 'Uploaded! Unlocking the next stop…';
       const i = huidigeUitdagingIndex;
       // Only advance if this is still the currently-active square (avoids two
