@@ -142,6 +142,7 @@
   .popup {
     background: #fff; border-radius: 20px; padding: 1.5rem; max-width: 380px; width: 100%;
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    max-height: 85vh; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .popup h3 { margin: 0 0 0.5rem; }
   .popup p { color: #6b5f45; font-size: 0.9rem; margin: 0 0 1rem; }
@@ -194,6 +195,34 @@
   .node.voltooid { background: var(--done); }
   .node:not(.locked):active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
 
+  /* Final node — noticeably bigger, gold ring, and a slow rotating sunburst
+     behind it so it reads as "boss level" at a glance, in any status. */
+  .node.finale {
+    width: 78px; height: 78px; margin-left: -39px; margin-top: -39px;
+    font-size: 1.7rem;
+    border: 5px solid #fff;
+    box-shadow: 0 0 0 4px #d9b13e, 0 6px 0 rgba(0,0,0,0.3), inset 0 -4px 0 rgba(0,0,0,0.15);
+  }
+  .node.finale.locked { background: #8a7a4f; }
+  .node.finale.actief  { background: linear-gradient(160deg, #e0483f, #c9a227); animation: pulseFinale 1.3s infinite; }
+  .node.finale.voltooid { background: linear-gradient(160deg, #d9b13e, var(--done)); }
+  .node.finale::before {
+    content: ""; position: absolute; inset: -22px; border-radius: 50%; z-index: -1;
+    background: repeating-conic-gradient(rgba(217,177,62,0.55) 0deg 6deg, transparent 6deg 20deg);
+    animation: rotateRays 10s linear infinite;
+  }
+  .finale-badge {
+    position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+    background: #d9b13e; color: #1a1408; font-size: 0.62rem; font-weight: 900;
+    letter-spacing: 0.08em; padding: 0.2rem 0.55rem; border-radius: 999px;
+    white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  @keyframes rotateRays { to { transform: rotate(360deg); } }
+  @keyframes pulseFinale {
+    0%, 100% { box-shadow: 0 0 0 4px #d9b13e, 0 6px 0 rgba(0,0,0,0.3), 0 0 0 4px rgba(224,72,63,0.6); }
+    50% { box-shadow: 0 0 0 4px #d9b13e, 0 6px 0 rgba(0,0,0,0.3), 0 0 0 16px rgba(224,72,63,0); }
+  }
+
   /* Player marker — a little champagne-bottle silhouette that glides to the
      current node whenever huidigeIndex advances. */
   .speler-figuur {
@@ -243,7 +272,11 @@
   #uitdaging-icoon { font-size: 2.2rem; text-align: center; margin-bottom: 0.25rem; }
   #uitdaging-hint { font-size: 0.8rem; color: var(--gold-dark); font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; text-align: center; margin-bottom: 0.4rem; }
   #uitdaging-titel { text-align: center; }
-  #uitdaging-tekst { text-align: center; }
+  /* Left-aligned with real line-height once this is a full paragraph (up to
+     ~150 words) — centered text gets hard to read past a sentence or two,
+     and the popup itself now scrolls (see .popup) so length can't break the
+     layout regardless of how long a story gets. */
+  #uitdaging-tekst { text-align: left; line-height: 1.55; font-size: 0.95rem; }
   #upload-preview { width: 100%; border-radius: 12px; margin-bottom: 0.75rem; display: none; max-height: 240px; object-fit: cover; }
   #upload-status { font-size: 0.85rem; color: #6b5f45; text-align: center; margin-bottom: 0.5rem; display: none; }
 
@@ -379,20 +412,20 @@
   // what to reenact for the photo. Placeholder set below uses real Valencia
   // landmarks as a starting point — swap in your own route/order.
   // ══════════════════════════════════════════════════════════════════
+  // 11 stops total. The last one is rendered as a bigger "FINAL LEVEL" node
+  // on the board (see renderBord) — no special field needed here, it's just
+  // whichever entry ends up last in this array. `tekst` can safely run to a
+  // full paragraph (150+ words) — the modal scrolls and wraps properly now.
   const CHALLENGES = [
-    { icoon: "🍾", hint: "Mercado Central",                 titel: "Born",               tekst: "Don Julio/Julia was born amid the bustle of the Mercado Central. Take a photo 'discovering' the bottle for the first time, surrounded by the market." },
+    { icoon: "🍾", hint: "Mercado Central",                 titel: "Born",               tekst: "Before Don Valencia was a name, they were just a rumor — a whisper passed between grape pickers in the hills above the city, about a bottle so fine it would one day need two names, one for each team that dared to carry it. The morning it happened, the Mercado Central was already roaring: fishmongers shouting the price of the day's catch, a woman arguing cheerfully over the last box of oranges, the iron roof rattling with pigeons. And there, tucked between a crate of saffron and a barrel nobody remembered ordering, the bottle simply... arrived. No fanfare. No spotlight. Just a faint pop, a curl of gold foil catching the morning light, and a market full of strangers who would later swear they felt something shift. Some say the bottle chose this market on purpose — loud, alive, impossible to ignore, exactly the kind of place a legend should begin. Find the spot where it happened. Recreate the moment. This is where the story of Don Valencia truly starts." },
     { icoon: "🎈", hint: "Jardín del Turia",                titel: "Childhood",          tekst: "A carefree childhood running through the old riverbed gardens. Recreate a playful kid moment in the Turia gardens." },
-    { icoon: "📚", hint: "La Lonja de la Seda",              titel: "School Days",        tekst: "Off to the fanciest school in the city. Pose like studious (or mischievous) students outside La Lonja." },
     { icoon: "💘", hint: "Plaza de la Virgen",               titel: "First Love",         tekst: "Don Julio/Julia met their first love right here. Reenact the meet-cute at Plaza de la Virgen." },
     { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Rebellious Phase",   tekst: "A wild teenage phase in the Carmen neighbourhood's street art alleys. Strike your best rebel pose." },
     { icoon: "💼", hint: "Mercado de Colón",                 titel: "First Job",          tekst: "Landed a fancy first job. Take a very serious 'business' photo at Mercado de Colón." },
-    { icoon: "🗺️", hint: "Torres de Serranos",               titel: "The Big Adventure",  tekst: "Left through the old city gates for a life-changing adventure. Recreate a dramatic departure at Torres de Serranos." },
-    { icoon: "🏖️", hint: "Playa de la Malvarrosa",           titel: "Beach Day",          tekst: "A well-earned beach day. Get the whole team into a beach photo at Malvarrosa." },
     { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Rise to Fame",       tekst: "Don Julio/Julia became famous, stepping into the future at the City of Arts and Sciences. Pose like a superstar." },
     { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Underwater Romance", tekst: "A second romance, this time underwater. Recreate a love story moment near the Oceanogràfic." },
     { icoon: "🦁", hint: "Bioparc València",                 titel: "Family Outing",      tekst: "A family day out. Recreate a classic family-photo pose at Bioparc." },
     { icoon: "🎉", hint: "Carmen nightlife",                 titel: "One Wild Night",     tekst: "One legendary night out. Capture the team mid-celebration in the Carmen nightlife streets." },
-    { icoon: "🌳", hint: "Jardines del Real (Viveros)",      titel: "Time to Reflect",    tekst: "A quiet moment of reflection. A calm, thoughtful photo in the Viveros gardens." },
     { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Old Age & Legacy",   tekst: "A long life, well lived. Recreate a proud, statue-like pose at Plaza del Ayuntamiento." },
     { icoon: "🥂", hint: "Tonight's final spot",             titel: "The Final Toast",    tekst: "The story ends where it's about to be uncorked. Get everyone together for the final toast photo." },
   ];
@@ -575,12 +608,20 @@
       let status = 'locked';
       if (voltooid[i]) status = 'voltooid';
       else if (i === huidigeIndex) status = 'actief';
-      el.className = 'node ' + status;
+      const isFinale = i === CHALLENGES.length - 1;
+      el.className = 'node ' + status + (isFinale ? ' finale' : '');
       el.style.left = p.x + '%';
       el.style.top  = p.y + '%';
       // Deliberately no title/label here — nothing about a challenge is
-      // revealed until you actually tap into it.
+      // revealed until you actually tap into it. The finale badge just
+      // marks "this is the last one", not what it actually is.
       el.textContent = status === 'voltooid' ? '✓' : String(i + 1);
+      if (isFinale) {
+        const badge = document.createElement('span');
+        badge.className = 'finale-badge';
+        badge.textContent = 'FINAL';
+        el.appendChild(badge);
+      }
       if (status === 'actief') el.addEventListener('click', function() { openUitdaging(i); });
       if (status === 'voltooid') el.addEventListener('click', function() { bekijkVoltooid(i); });
       container.appendChild(el);
