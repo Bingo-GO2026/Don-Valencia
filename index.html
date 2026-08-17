@@ -408,27 +408,53 @@
 
   // ══════════════════════════════════════════════════════════════════
   // CHALLENGES — edit freely. Each one is a stop on the path, in order.
+  // Don Julio and Don Julia are two COMPLETELY SEPARATE stories — they get
+  // their own array below, and a team only ever sees its own 11 entries.
+  // Nothing about one team's story is ever shown to, or shared with, the
+  // other team — they're independent from start to finish.
   // `hint` = the landmark to go find. `titel`/`tekst` = the story beat and
-  // what to reenact for the photo. Placeholder set below uses real Valencia
-  // landmarks as a starting point — swap in your own route/order.
+  // what to reenact for the photo. `tekst` can safely run to a full
+  // paragraph (150+ words) — the modal scrolls and wraps properly.
+  // Placeholder text below is just "Challenge N X" — paste in your own
+  // written story for each team, stop by stop.
   // ══════════════════════════════════════════════════════════════════
-  // 11 stops total. The last one is rendered as a bigger "FINAL LEVEL" node
-  // on the board (see renderBord) — no special field needed here, it's just
-  // whichever entry ends up last in this array. `tekst` can safely run to a
-  // full paragraph (150+ words) — the modal scrolls and wraps properly now.
-  const CHALLENGES = [
-    { icoon: "🍾", hint: "Mercado Central",                 titel: "Born",               tekst: "Before Don Valencia was a name, they were just a rumor — a whisper passed between grape pickers in the hills above the city, about a bottle so fine it would one day need two names, one for each team that dared to carry it. The morning it happened, the Mercado Central was already roaring: fishmongers shouting the price of the day's catch, a woman arguing cheerfully over the last box of oranges, the iron roof rattling with pigeons. And there, tucked between a crate of saffron and a barrel nobody remembered ordering, the bottle simply... arrived. No fanfare. No spotlight. Just a faint pop, a curl of gold foil catching the morning light, and a market full of strangers who would later swear they felt something shift. Some say the bottle chose this market on purpose — loud, alive, impossible to ignore, exactly the kind of place a legend should begin. Find the spot where it happened. Recreate the moment. This is where the story of Don Valencia truly starts." },
-    { icoon: "🎈", hint: "Jardín del Turia",                titel: "Childhood",          tekst: "A carefree childhood running through the old riverbed gardens. Recreate a playful kid moment in the Turia gardens." },
-    { icoon: "💘", hint: "Plaza de la Virgen",               titel: "First Love",         tekst: "Don Julio/Julia met their first love right here. Reenact the meet-cute at Plaza de la Virgen." },
-    { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Rebellious Phase",   tekst: "A wild teenage phase in the Carmen neighbourhood's street art alleys. Strike your best rebel pose." },
-    { icoon: "💼", hint: "Mercado de Colón",                 titel: "First Job",          tekst: "Landed a fancy first job. Take a very serious 'business' photo at Mercado de Colón." },
-    { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Rise to Fame",       tekst: "Don Julio/Julia became famous, stepping into the future at the City of Arts and Sciences. Pose like a superstar." },
-    { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Underwater Romance", tekst: "A second romance, this time underwater. Recreate a love story moment near the Oceanogràfic." },
-    { icoon: "🦁", hint: "Bioparc València",                 titel: "Family Outing",      tekst: "A family day out. Recreate a classic family-photo pose at Bioparc." },
-    { icoon: "🎉", hint: "Carmen nightlife",                 titel: "One Wild Night",     tekst: "One legendary night out. Capture the team mid-celebration in the Carmen nightlife streets." },
-    { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Old Age & Legacy",   tekst: "A long life, well lived. Recreate a proud, statue-like pose at Plaza del Ayuntamiento." },
-    { icoon: "🥂", hint: "Tonight's final spot",             titel: "The Final Toast",    tekst: "The story ends where it's about to be uncorked. Get everyone together for the final toast photo." },
+  // 11 stops total per team. The last one is rendered as a bigger "FINAL
+  // LEVEL" node on the board (see renderBord) — no special field needed
+  // here, it's just whichever entry ends up last in each array.
+  const CHALLENGES_JULIO = [
+    { icoon: "🍾", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Challenge 1 X" },
+    { icoon: "🎈", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
+    { icoon: "💘", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
+    { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
+    { icoon: "💼", hint: "Mercado de Colón",                 titel: "Challenge 5",  tekst: "Challenge 5 X" },
+    { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Challenge 6",  tekst: "Challenge 6 X" },
+    { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Challenge 7",  tekst: "Challenge 7 X" },
+    { icoon: "🦁", hint: "Bioparc València",                 titel: "Challenge 8",  tekst: "Challenge 8 X" },
+    { icoon: "🎉", hint: "Carmen nightlife",                 titel: "Challenge 9",  tekst: "Challenge 9 X" },
+    { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Challenge 10", tekst: "Challenge 10 X" },
+    { icoon: "🥂", hint: "Tonight's final spot",             titel: "Challenge 11", tekst: "Challenge 11 X" },
   ];
+
+  const CHALLENGES_JULIA = [
+    { icoon: "🍾", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Challenge 1 X" },
+    { icoon: "🎈", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
+    { icoon: "💘", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
+    { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
+    { icoon: "💼", hint: "Mercado de Colón",                 titel: "Challenge 5",  tekst: "Challenge 5 X" },
+    { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Challenge 6",  tekst: "Challenge 6 X" },
+    { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Challenge 7",  tekst: "Challenge 7 X" },
+    { icoon: "🦁", hint: "Bioparc València",                 titel: "Challenge 8",  tekst: "Challenge 8 X" },
+    { icoon: "🎉", hint: "Carmen nightlife",                 titel: "Challenge 9",  tekst: "Challenge 9 X" },
+    { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Challenge 10", tekst: "Challenge 10 X" },
+    { icoon: "🥂", hint: "Tonight's final spot",             titel: "Challenge 11", tekst: "Challenge 11 X" },
+  ];
+
+  // Always look up the active team's own story through this — never reach
+  // for CHALLENGES_JULIO / CHALLENGES_JULIA directly outside this function,
+  // so the two stories can never accidentally cross.
+  function huidigeUitdagingen() {
+    return huidigTeam === 'julia' ? CHALLENGES_JULIA : CHALLENGES_JULIO;
+  }
 
   // ══════════════════════════════════════════════════════════════════
   // STATE
@@ -562,7 +588,7 @@
       huidigeIndex = data.huidigeIndex || 0;
       voltooid = data.voltooid || {};
       renderBord();
-      if (huidigeIndex >= CHALLENGES.length) toonEinde();
+      if (huidigeIndex >= huidigeUitdagingen().length) toonEinde();
     });
   }
 
@@ -581,12 +607,12 @@
   function renderBord() {
     const container = document.getElementById('pad-container');
     const svg = document.getElementById('pad-svg');
-    document.getElementById('board-voortgang').textContent = Math.min(huidigeIndex, CHALLENGES.length) + ' / ' + CHALLENGES.length;
+    document.getElementById('board-voortgang').textContent = Math.min(huidigeIndex, huidigeUitdagingen().length) + ' / ' + huidigeUitdagingen().length;
 
     // Remove old node elements (keep the svg)
     container.querySelectorAll('.node').forEach(function(el) { el.remove(); });
 
-    const punten = CHALLENGES.map(function(c, i) { return knoopPositie(i, CHALLENGES.length); });
+    const punten = huidigeUitdagingen().map(function(c, i) { return knoopPositie(i, huidigeUitdagingen().length); });
 
     // Draw the path in real pixel space (not a 0-100 viewBox stretched to fit)
     // so the stroke stays a true circle/round cap instead of getting warped
@@ -608,7 +634,7 @@
       let status = 'locked';
       if (voltooid[i]) status = 'voltooid';
       else if (i === huidigeIndex) status = 'actief';
-      const isFinale = i === CHALLENGES.length - 1;
+      const isFinale = i === huidigeUitdagingen().length - 1;
       el.className = 'node ' + status + (isFinale ? ' finale' : '');
       el.style.left = p.x + '%';
       el.style.top  = p.y + '%';
@@ -648,11 +674,11 @@
       container.appendChild(fig);
     }
 
-    const doelIndex = Math.min(huidigeIndex, CHALLENGES.length - 1);
+    const doelIndex = Math.min(huidigeIndex, huidigeUitdagingen().length - 1);
     const doel = punten[doelIndex];
 
     const voltooidAantal = Object.keys(voltooid).length;
-    const groei = 0.55 + Math.min(1, voltooidAantal / CHALLENGES.length) * 0.65; // 0.55 → 1.2
+    const groei = 0.55 + Math.min(1, voltooidAantal / huidigeUitdagingen().length) * 0.65; // 0.55 → 1.2
     fig.style.setProperty('--figuur-schaal', groei.toFixed(2));
 
     if (doelIndex !== vorigeSpelerIndex) {
@@ -677,7 +703,7 @@
 
   function openUitdaging(i) {
     huidigeUitdagingIndex = i;
-    const c = CHALLENGES[i];
+    const c = huidigeUitdagingen()[i];
     document.getElementById('uitdaging-icoon').textContent = c.icoon;
     document.getElementById('uitdaging-hint').textContent = 'Near: ' + c.hint;
     document.getElementById('uitdaging-titel').textContent = c.titel;
@@ -690,7 +716,7 @@
   }
 
   function bekijkVoltooid(i) {
-    const c = CHALLENGES[i];
+    const c = huidigeUitdagingen()[i];
     const v = voltooid[i];
     huidigeUitdagingIndex = null; // read-only view, no re-upload
     document.getElementById('uitdaging-icoon').textContent = c.icoon;
@@ -797,7 +823,7 @@
     eindeGetoond = true;
     const galerij = document.getElementById('einde-galerij');
     galerij.innerHTML = '';
-    CHALLENGES.forEach(function(c, i) {
+    huidigeUitdagingen().forEach(function(c, i) {
       if (voltooid[i] && voltooid[i].fotoUrl) {
         const img = document.createElement('img');
         img.src = voltooid[i].fotoUrl;
