@@ -325,9 +325,9 @@
   <div id="overlay-wachtwoord" class="overlay">
     <div class="popup">
       <h3 id="wachtwoord-titel">Team password</h3>
-      <p id="wachtwoord-uitleg">Be the first? Set a password for your team and share it with everyone joining.</p>
-      <input type="text" id="wachtwoord-input" maxlength="20" placeholder="e.g. donjulio2026" autocomplete="off" />
-      <div class="fout-tekst" id="wachtwoord-fout">Wrong password — try again.</div>
+      <p id="wachtwoord-uitleg">Bedenk een wachtwoord voor je team.</p>
+      <input type="text" id="wachtwoord-input" maxlength="20" placeholder="e.g. DonCheadle" autocomplete="off" />
+      <div class="fout-tekst" id="wachtwoord-fout">Fout wachtwoord, probeer opnieuw.</div>
       <div class="knop-rij">
         <button class="knop grijs" onclick="sluitWachtwoordPopup()">Cancel</button>
         <button class="knop" onclick="bevestigWachtwoord()">Continue</button>
@@ -363,7 +363,7 @@
       <input type="file" id="bestand-input" accept="image/*" style="display:none" onchange="bestandGekozen(event)" />
       <div class="knop-rij">
         <button class="knop grijs" onclick="sluitUitdaging()">Close</button>
-        <button class="knop" id="upload-knop" onclick="document.getElementById('bestand-input').click()">📷 Take / choose photo</button>
+        <button class="knop" id="upload-knop" onclick="document.getElementById('bestand-input').click()"> Take / choose photo</button>
       </div>
     </div>
   </div>
@@ -371,8 +371,8 @@
   <!-- End of game -->
   <div id="modal-einde" class="overlay">
     <div class="popup">
-      <h2>🎉 That's the story of Don Julio &amp; Don Julia!</h2>
-      <p>Thanks for playing — here's your journey:</p>
+      <h2> &amp; And they lived happily ever after...</h2>
+      <p>Hier jullie leven:</p>
       <div id="einde-galerij"></div>
       <button class="knop" onclick="sluitEinde()">OK</button>
     </div>
@@ -422,7 +422,10 @@
   // LEVEL" node on the board (see renderBord) — no special field needed
   // here, it's just whichever entry ends up last in each array.
   const CHALLENGES_JULIO = [
-    { icoon: "🍾", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Challenge 1 X" },
+    { icoon: "🍾", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Wow, wat een prachtig moment. Neem even adem en sta erbij stil dat jullie zojuist nieuw leven hebben gecreëerd. Na keiharde gay sex is het jullie daadwerkelijk gelukt om een kind op aarde te brengen. En niet zomaar eentje ook: het is een baby van maar liefst 5 kilo.
+Maar goed dit is slechts het prille begin van het verhaal van Don Julio en zijn onvermijdelijke reis naar succes. Er zullen hoogtepunten zijn. Er zullen dieptepunten zijn. Er zullen momenten komen waarop het lot zelf hem probeert te breken. Maar als goede ouders zullen jullie aan zijn zijde staan en hem steunen tijdens iedere triomf, tragedie en totaal onverklaarbare levenskeuze.
+Don Julio werd geboren in de Kathedraal van Valencia. De meeste baby's huilen bij hun geboorte, maar Julio niet. Julio was anders.
+Vanaf moment een begon Don Julio al aura te farmen. Een baby van zijn kaliber moet dan ook een outfit hebben om zijn volle mog potentie tot aarde te brengen. Als goede vaders kleden jullie Don Julio met een anti-goon outfit aan voor zijn eerste familiefoto." },
     { icoon: "🎈", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
     { icoon: "💘", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
     { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
@@ -436,17 +439,17 @@
   ];
 
   const CHALLENGES_JULIA = [
-    { icoon: "🍾", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Challenge 1 X" },
-    { icoon: "🎈", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
-    { icoon: "💘", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
-    { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
-    { icoon: "💼", hint: "Mercado de Colón",                 titel: "Challenge 5",  tekst: "Challenge 5 X" },
-    { icoon: "🌟", hint: "Ciutat de les Arts i les Ciències", titel: "Challenge 6",  tekst: "Challenge 6 X" },
-    { icoon: "🐠", hint: "Oceanogràfic",                     titel: "Challenge 7",  tekst: "Challenge 7 X" },
-    { icoon: "🦁", hint: "Bioparc València",                 titel: "Challenge 8",  tekst: "Challenge 8 X" },
-    { icoon: "🎉", hint: "Carmen nightlife",                 titel: "Challenge 9",  tekst: "Challenge 9 X" },
-    { icoon: "🏛️", hint: "Plaza del Ayuntamiento",           titel: "Challenge 10", tekst: "Challenge 10 X" },
-    { icoon: "🥂", hint: "Tonight's final spot",             titel: "Challenge 11", tekst: "Challenge 11 X" },
+    { icoon: "", hint: "Mercado Central",                 titel: "Challenge 1",  tekst: "Challenge 1 X" },
+    { icoon: "", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
+    { icoon: "", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
+    { icoon: "", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
+    { icoon: "", hint: "Mercado de Colón",                 titel: "Challenge 5",  tekst: "Challenge 5 X" },
+    { icoon: "", hint: "Ciutat de les Arts i les Ciències", titel: "Challenge 6",  tekst: "Challenge 6 X" },
+    { icoon: "", hint: "Oceanogràfic",                     titel: "Challenge 7",  tekst: "Challenge 7 X" },
+    { icoon: "", hint: "Bioparc València",                 titel: "Challenge 8",  tekst: "Challenge 8 X" },
+    { icoon: "", hint: "Carmen nightlife",                 titel: "Challenge 9",  tekst: "Challenge 9 X" },
+    { icoon: "", hint: "Plaza del Ayuntamiento",           titel: "Challenge 10", tekst: "Challenge 10 X" },
+    { icoon: "", hint: "Tonight's final spot",             titel: "Challenge 11", tekst: "Challenge 11 X" },
   ];
 
   // Always look up the active team's own story through this — never reach
