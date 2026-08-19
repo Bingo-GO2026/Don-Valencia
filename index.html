@@ -409,24 +409,8 @@
   const auth = firebase.auth();
   const db   = firebase.database();
 
-  // ══════════════════════════════════════════════════════════════════
-  // CHALLENGES — edit freely. Each one is a stop on the path, in order.
-  // Don Julio and Don Julia are two COMPLETELY SEPARATE stories — they get
-  // their own array below, and a team only ever sees its own 11 entries.
-  // Nothing about one team's story is ever shown to, or shared with, the
-  // other team — they're independent from start to finish.
-  // `hint` = the landmark to go find. `titel`/`tekst` = the story beat and
-  // what to reenact for the photo. `tekst` can safely run to a full
-  // paragraph (150+ words) — the modal scrolls and wraps properly.
-  // Placeholder text below is just "Challenge N X" — paste in your own
-  // written story for each team, stop by stop.
-  // ══════════════════════════════════════════════════════════════════
-  // 11 stops total per team. The last one is rendered as a bigger "FINAL
-  // LEVEL" node on the board (see renderBord) — no special field needed
-  // here, it's just whichever entry ends up last in each array.
   const CHALLENGES_JULIO = [
-    { icoon: "", hint: "",                 titel: "Uno",  tekst: "Wow, wat een prachtig moment. \nNeem even adem en sta erbij stil dat jullie zojuist nieuw leven hebben gecreëerd. \n\nNa keiharde gay sex is het jullie daadwerkelijk gelukt om een kind op aarde te brengen. \n\n\n\n\nEn niet zomaar eentje ook: het is een baby van maar liefst 5 kilo. Maar goed, dit is slechts het prille begin van het verhaal van Don Julio en zijn onvermijdelijke reis naar succes. Er zullen hoogtepunten zijn. Er zullen dieptepunten zijn. Er zullen momenten komen waarop het lot zelf hem probeert te breken. Maar als goede ouders zullen jullie aan zijn zijde staan en hem steunen tijdens iedere triomf, tragedie en totaal onverklaarbare levenskeuze. Don Julio werd geboren in de Kathedraal van Valencia. De meeste baby's huilen bij hun geboorte, maar Julio niet. Julio was anders. Vanaf moment een begon Don Julio al aura te farmen. Een baby van zijn kaliber moet dan ook een outfit hebben om zijn volle mog potentie tot aarde te brengen. Als goede vaders kleden jullie Don Julio met een anti-goon outfit aan voor zijn eerste familiefoto.
-" },
+    { icoon: "", hint: "",                 titel: "Uno",  tekst: "Wow, wat een prachtig moment. \nNeem even adem en sta erbij stil dat jullie zojuist nieuw leven hebben gecreëerd. \n\nNa keiharde gay sex is het jullie daadwerkelijk gelukt om een kind op aarde te brengen. \n\n\n\n\nEn niet zomaar eentje ook: het is een baby van maar liefst 5 kilo. Maar goed, dit is slechts het prille begin van het verhaal van Don Julio en zijn onvermijdelijke reis naar succes. Er zullen hoogtepunten zijn. Er zullen dieptepunten zijn. Er zullen momenten komen waarop het lot zelf hem probeert te breken. Maar als goede ouders zullen jullie aan zijn zijde staan en hem steunen tijdens iedere triomf, tragedie en totaal onverklaarbare levenskeuze. Don Julio werd geboren in de Kathedraal van Valencia. De meeste baby's huilen bij hun geboorte, maar Julio niet. Julio was anders. Vanaf moment een begon Don Julio al aura te farmen. Een baby van zijn kaliber moet dan ook een outfit hebben om zijn volle mog potentie tot aarde te brengen. Als goede vaders kleden jullie Don Julio met een anti-goon outfit aan voor zijn eerste familiefoto." },
     { icoon: "🎈", hint: "Jardín del Turia",                titel: "Challenge 2",  tekst: "Challenge 2 X" },
     { icoon: "💘", hint: "Plaza de la Virgen",               titel: "Challenge 3",  tekst: "Challenge 3 X" },
     { icoon: "🎸", hint: "Barri del Carmen",                 titel: "Challenge 4",  tekst: "Challenge 4 X" },
